@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Profile {
+  id String @id
+  user User @relation(fields: [id], references: [id])
+  email String @unique
+  firstName String?
+  lastName String
+  street String
+  numberStreet Int
+  neighborhood String
+  city String
+  state String
+  country String
+  zipcode String
+  role Role[]
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
+model User {
+  id String @default(cuid()) @id
+  email String @unique
+  password String
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  profile Profile?
+  kamban Kamban[]
+}
+
+model Kamban {
+  id String @default(cuid()) @id
+  name String @unique
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  columns KambanColumn[]
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
+model KambanColumn {
+  id String @default(cuid()) @id
+  name String @unique
+  KambanFather Kamban @relation(fields: [fatherId], references: [id])
+  fatherId String
+  order Int @unique @default(autoincrement())
+  items KambanItem[]
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
+model KambanItem {
+  id String @default(cuid()) @id
+  name String
+  description String
+  order Int @unique @default(autoincrement())
+  column KambanColumn @relation(fields: [columnId], references: [id])
+  columnId String
+  tagId String?
+  tag Tag? @relation(fields: [tagId], references: [id])
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+}
+
+model Tag {
+  id String @default(cuid()) @id
+  name String
+  color String
+  kambanItem KambanItem[]
+}
